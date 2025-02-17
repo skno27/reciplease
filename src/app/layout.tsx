@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next/types";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NextAuthProvider } from "./providers/nextauth-provider";
@@ -27,13 +27,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextAuthProvider>
           <div className=" overflow-y-auto">
             {children}
             <Toaster />
-            </div>
+          </div>
         </NextAuthProvider>
       </body>
     </html>
