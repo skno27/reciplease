@@ -1,3 +1,5 @@
+export const config = { runtime: "nodejs" };
+
 import { encryptPassword, verifyToken } from "./authService";
 import prisma from "./prisma";
 import nodemailer from "nodemailer";
