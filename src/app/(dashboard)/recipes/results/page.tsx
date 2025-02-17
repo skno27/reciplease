@@ -1,5 +1,6 @@
 "use client";
-import { useCallback, useMemo, useState, useEffect } from "react";
+
+import { Suspense, useCallback, useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 // import { useSession } from "next-auth/react";
 // import sampleFullReturn from "../../../../data/sampleFullReturn.json";
@@ -7,14 +8,12 @@ import { RecipeResult } from "../definitions/definitions";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import { RecipeSearchParams, recipeSearchSchema } from "@/schemas/recipeSearch";
 
-export default function ResultsPage() {
+function ResultsContent() {
   const [data, setData] = useState<null>(null);
   const [recipeIndex, setRecipeIndex] = useState<number>(0);
 
   // Use the hook to get the search params from the URL.
   const searchParams = useSearchParams();
-  // const session = useSession();
-  // console.log("session looks like: ", session);
 
   // Wrap the function in useCallback so that it uses the dependency array correctly.
   const parseSearchParams = useCallback(() => {
@@ -136,5 +135,13 @@ export default function ResultsPage() {
         </button>
       )}
     </>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={<p>Loading search parameters...</p>}>
+      <ResultsContent />
+    </Suspense>
   );
 }
