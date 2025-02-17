@@ -1,54 +1,52 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// import { useSession } from "next-auth/react";
 import ProgressRing from "@/components/health/ProgressRing";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function HealthTracker() {
-  // these arent actually used or needed
-  // const { data: session } = useSession();
-  // const userId = session?.user?.id;
-
-  const [calories, setCalories] = useState(
-    Number(localStorage.getItem("dailyCalories")) ?? 0
-  );
-  const [protein, setProtein] = useState(
-    Number(localStorage.getItem("dailyProtein")) ?? 0
-  );
+  // Initialize state with default values (avoid directly calling localStorage)
+  const [calories, setCalories] = useState(0);
+  const [protein, setProtein] = useState(0);
   const [inputCalories, setInputCalories] = useState(0);
   const [inputProtein, setInputProtein] = useState(0);
 
   const calorieGoal = 3000;
   const proteinGoal = 150;
 
-  console.log(
-    "dailyCalories: ",
-    localStorage.getItem("dailyCalories"),
-    " dailyProtein: ",
-    localStorage.getItem("dailyProtein")
-  );
-  // Load existing data from localStorage (for persistence)
+  // Use useEffect to read localStorage only on the client
   useEffect(() => {
-    const storedCalories = Number(localStorage.getItem("dailyCalories"));
-    const storedProtein = Number(localStorage.getItem("dailyProtein"));
+    // Check if localStorage is available (it should be in the browser)
+    if (typeof window !== "undefined") {
+      const storedCalories = localStorage.getItem("dailyCalories");
+      const storedProtein = localStorage.getItem("dailyProtein");
 
-    if (storedCalories) setCalories(Number(storedCalories));
-    if (storedProtein) setProtein(Number(storedProtein));
-    const checkAndSendData = () => {
-      const lastReset = localStorage.getItem("lastReset");
-      const today = new Date().toISOString().split("T")[0];
+      if (storedCalories) setCalories(Number(storedCalories));
+      if (storedProtein) setProtein(Number(storedProtein));
 
-      if (lastReset !== today) {
-        sendDailyData(storedCalories, storedProtein);
-        localStorage.setItem("lastReset", today);
-        resetTracker();
-      }
-    };
+      const checkAndSendData = () => {
+        const lastReset = localStorage.getItem("lastReset");
+        const today = new Date().toISOString().split("T")[0];
 
-    checkAndSendData();
+        if (lastReset !== today) {
+          sendDailyData(Number(storedCalories), Number(storedProtein));
+          localStorage.setItem("lastReset", today);
+          resetTracker();
+        }
+      };
+
+      checkAndSendData();
+    }
   }, []);
+
+  // Save to localStorage when state updates
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dailyCalories", calories.toString());
+      localStorage.setItem("dailyProtein", protein.toString());
+    }
+  }, [calories, protein]);
 
   const sendDailyData = async (calories: number, protein: number) => {
     if (calories === 0 && protein === 0) return; // Don't send empty data
@@ -71,17 +69,13 @@ export default function HealthTracker() {
   };
 
   const resetTracker = () => {
-    localStorage.setItem("dailyCalories", "0");
-    localStorage.setItem("dailyProtein", "0");
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dailyCalories", "0");
+      localStorage.setItem("dailyProtein", "0");
+    }
     setCalories(0);
     setProtein(0);
   };
-
-  // Save to localStorage when state updates
-  useEffect(() => {
-    localStorage.setItem("dailyCalories", calories.toString());
-    localStorage.setItem("dailyProtein", protein.toString());
-  }, [calories, protein]);
 
   const handleAddCalories = () => {
     setCalories((prev) => prev + Number(inputCalories));
@@ -119,7 +113,7 @@ export default function HealthTracker() {
               className="w-24 text-center"
             />
             <Button
-              onClick={() => handleAddCalories()}
+              onClick={handleAddCalories}
               className="bg-yellow-400 hover:bg-yellow-500">
               Add
             </Button>
@@ -144,7 +138,7 @@ export default function HealthTracker() {
               className="w-24 text-center"
             />
             <Button
-              onClick={() => handleAddProtein()}
+              onClick={handleAddProtein}
               className="bg-green-400 hover:bg-green-500">
               Add
             </Button>
