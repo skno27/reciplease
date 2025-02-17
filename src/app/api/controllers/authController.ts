@@ -1,3 +1,4 @@
+export const config = { runtime: "nodejs" };
 import * as authService from "../services/authService";
 
 // register

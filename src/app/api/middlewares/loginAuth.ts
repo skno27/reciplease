@@ -1,3 +1,4 @@
+export const config = { runtime: "nodejs" };
 // src/app/api/middlewares/loginAuth.ts
 import { NextRequest, NextResponse } from "next/server";
 import * as authService from "../services/authService";

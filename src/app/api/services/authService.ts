@@ -1,4 +1,3 @@
-export const config = { runtime: "nodejs" };
 import { SignJWT, jwtVerify, JWTVerifyResult } from "jose";
 import prisma from "./prisma";
 import bcrypt from "bcryptjs";
