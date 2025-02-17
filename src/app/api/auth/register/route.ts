@@ -2,6 +2,8 @@ import { registerUser } from "../../controllers/authController";
 import { NextRequest, NextResponse } from "next/server";
 import { Account } from "../../middlewares/schemas";
 
+export const config = { runtime: "nodejs" };
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json(); // Get the body from the request
