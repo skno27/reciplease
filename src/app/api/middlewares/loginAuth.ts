@@ -19,7 +19,7 @@ export const isAuthenticated = async (
     console.log("trying to authenticate...");
     const decoded = await authService.verifyToken(token);
     const authenticatedRequest = req as AuthenticatedRequest;
-    // Ensure that your JWT payload contains an "id" property.
+    // Ensure that the JWT payload contains an "id" property.
     authenticatedRequest.user = { id: decoded.id as string };
     console.log("Authenticated!");
     return authenticatedRequest;

@@ -1,15 +1,14 @@
+export const config = { runtime: "nodejs" };
+
 import { changePassword } from "@/app/api/controllers/userController";
 import { NextRequest, NextResponse } from "next/server";
 import parseBody from "../../utils/parseBody";
 import { PasswordUpdate } from "../../middlewares/schemas";
-import { isAuthenticated } from "../../middlewares/loginAuth";
+import { getIdFromRequest } from "../../services/userService";
 
 export async function PATCH(req: NextRequest) {
-  const authResponse = isAuthenticated(req);
-  if (authResponse instanceof NextResponse) return authResponse; // return the response if !authenticated
-
   try {
-    const userId = (authResponse as { user: { id: string } }).user.id;
+    const userId = await getIdFromRequest(req);
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is missing from the header" },

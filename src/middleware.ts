@@ -71,4 +71,5 @@ export const config = {
     "/profile/:path*",
     "/recipes/:path*",
   ],
+  runtime: "nodejs",
 };

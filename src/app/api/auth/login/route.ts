@@ -1,9 +1,8 @@
+export const config = { runtime: "nodejs" };
 import { loginUser } from "../../controllers/authController";
 import { NextRequest, NextResponse } from "next/server";
 import { Login } from "../../middlewares/schemas";
 import parseBody from "../../utils/parseBody";
-
-export const config = { runtime: "nodejs" };
 
 export async function POST(req: NextRequest) {
   try {

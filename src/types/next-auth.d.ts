@@ -1,4 +1,4 @@
-import NextAuth, { DefaultSession } from "next-auth";
+import { DefaultSession } from "next-auth"; // originally imports NextAuth but doesnt user -- removed
 
 declare module "next-auth" {
   interface Session {
@@ -22,4 +22,3 @@ declare module "next-auth/jwt" {
     surveyed?: boolean;
   }
 }
-

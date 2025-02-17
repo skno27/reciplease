@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "../../middlewares/loginAuth";
 import parseBody from "../../utils/parseBody";
 // import prisma from "../../services/prisma";
 import { storeTrackingData } from "../../controllers/userController";
 import { TrackingUpdate } from "../../middlewares/schemas";
+import { getIdFromRequest } from "../../services/userService";
 
 export async function POST(req: NextRequest) {
-  const authResponse = isAuthenticated(req);
-  if (authResponse instanceof NextResponse) return authResponse;
-
+  const userId = await getIdFromRequest(req);
+  if (!userId) {
+    return NextResponse.json(
+      { error: "No id in header. User must log in" },
+      { status: 500 }
+    );
+  }
   try {
-    const userId = (authResponse as { user: { id: string } }).user.id;
     const body = await parseBody(req);
     const validationResult = TrackingUpdate.safeParse(body);
     if (!validationResult.success) {

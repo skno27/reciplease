@@ -201,8 +201,14 @@ export const getIdFromRequest = async (req: NextRequest) => {
     const jwtCookie = req.cookies.get("jwt")?.value;
     if (jwtCookie) {
       const payload = await verifyToken(jwtCookie);
+      if (!payload) {
+        throw new Error("Could not verify the jwt token");
+      }
       userId = payload?.id as string;
     }
+  }
+  if (!userId) {
+    throw new Error("No userId. User must log in");
   }
   return userId;
 };
