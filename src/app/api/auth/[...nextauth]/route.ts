@@ -1,11 +1,11 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
-// import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter"; // not sure why these were commented out
 import prisma from "../../services/prisma";
 
 export const authOptions: NextAuthOptions = {
-  // adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma), // *
   jwt: {
     secret: process.env.NEXTAUTH_SECRET,
   },
@@ -50,7 +50,6 @@ export const authOptions: NextAuthOptions = {
         where: { email: profile.email },
         create: {
           email: profile.email,
-          // username: profile.email.split('@')[0],
           name: profile.name ?? "unknown",
         },
         update: {
