@@ -1,29 +1,32 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "../services/prisma"; // Adjust import based on your setup
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+import { getIdFromRequest } from "../services/userService";
+
+export async function POST(req: NextRequest) {
+  const userId = await getIdFromRequest(req);
+  if (!userId) {
+    return NextResponse.json(
+      { error: "No id in header. Please log in" },
+      { status: 500 }
+    );
   }
 
   try {
-    const { calories, protein, water, date } = await req.json();
+    const { caloriesIn, protein, water, date } = await req.json();
 
-    if (calories === 0 && protein === 0 && water === 0) {
+    if (caloriesIn === 0 && protein === 0 && water === 0) {
       return NextResponse.json({ message: "No data to save" }, { status: 200 });
     }
 
     // minor correction, so that the healthLog is created THROUGH the user on the database instead of just independently
     // may not be necessary, since we are using a NoSQL database --
     const entry = await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: userId },
       data: {
         healthLogs: {
           create: {
-            calories,
+            caloriesIn,
             protein,
             water,
             date: new Date(date),
