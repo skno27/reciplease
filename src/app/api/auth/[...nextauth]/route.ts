@@ -4,7 +4,7 @@ import GithubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter"; // not sure why these were commented out
 import prisma from "../../services/prisma";
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma), // *
   jwt: {
     secret: process.env.NEXTAUTH_SECRET,
@@ -30,16 +30,22 @@ const authOptions: NextAuthOptions = {
   debug: true,
   callbacks: {
     async session({ session, user, token }) {
-      console.log("session is: ", session);
-      if (user) {
-        session.user.id = user.id;
-        session.user.email = user.email;
+      console.log("session before: ", session);
+      console.log("token data: ", token);
+      if (token) {
+        session.user = {
+          ...session.user,
+          id: token.id,
+          surveyed: token.surveyed || false,
+        }
       }
       if (token?.surveyed !== undefined) {
         session.user.surveyed = token.surveyed;
       }
+      console.log("session after: ", session);
       return session;
     },
+
     async signIn({ profile }) {
       if (!profile?.email) {
         throw new Error("No profile");
@@ -58,13 +64,19 @@ const authOptions: NextAuthOptions = {
       });
       return true;
     },
+
     async jwt({ token }) {
       const dbUser = await prisma.user.findUnique({
         where: { email: token.email! },
-        select: { surveyed: true },
+        select: { id: true, surveyed: true },
       });
 
       token.surveyed = dbUser?.surveyed || false;
+
+      if (dbUser) {
+        token.id = dbUser.id; // Assign MongoDB _id to token.id
+        token.surveyed = dbUser.surveyed || false;
+      }
       return token;
     },
   },
