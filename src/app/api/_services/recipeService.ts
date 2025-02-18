@@ -1,11 +1,4 @@
-// import { Nutrition } from "@prisma/client";
-// import prisma from "../services/prisma";
-
 import { Sensitivity } from "@prisma/client";
-
-// export const getRecipesByIngredients = async (includeIngredients: string) => {
-//   // &includeIngredients=${includeIngredients}
-// };
 
 // Mifflin-St Jeor method to calculate BMR
 
@@ -26,6 +19,9 @@ export const getRecipes = async (
     6.25 * parseFloat(height) -
     5 * parseInt(age) +
     addBMR;
+
+  console.log("Search:", query, query.length);
+  console.log("Ingredients:", includeIngredients, includeIngredients.length);
 
   const activityLevelNum = () => {
     switch (activityLevel) {
@@ -49,15 +45,15 @@ export const getRecipes = async (
   const fat = (calories * 0.3) / 9;
   const carbs = (calories * 0.5) / 4;
 
-  // ±20%
+  // ±20% , edited lol
   const maxCalories = Math.round(calories * 1.2);
-  const minCalories = Math.round(calories * 0.8);
-  const maxProtein = Math.round(protein * 1.2);
-  const minProtein = Math.round(protein * 0.8);
+  const minCalories = Math.round(calories * 0.5);
+  // const maxProtein = Math.round(protein * 1.2);
+  const minProtein = Math.round(protein * 0.5);
   const maxFat = Math.round(fat * 1.2);
-  const minFat = Math.round(fat * 0.8);
+  const minFat = Math.round(fat * 0.5);
   const maxCarbs = Math.round(carbs * 1.2);
-  const minCarbs = Math.round(carbs * 0.8);
+  const minCarbs = Math.round(carbs * 0.5);
 
   // ±15%
   // const maxCalories = Math.round(calories * 1.15);
@@ -80,13 +76,33 @@ export const getRecipes = async (
   // const minCarbs = Math.round(carbs * 0.9);
 
   let exclude = "";
-  excludeIngredients.forEach((ing) => (exclude += ing.toLowerCase()));
+  excludeIngredients.forEach((ing) => (exclude += ing.toLowerCase() + ","));
+
+  if (exclude.length > 0) {
+    const exclusionArr = exclude.split("").slice(0, -1);
+    exclude = exclusionArr.join("");
+  }
 
   try {
-    const res = await fetch(
-      `https://api.spoonacular.com/recipes/complexSearch?query=${query}&maxCalories=${maxCalories}&minCalories=${minCalories}&maxProtein=${maxProtein}&minProtein=${minProtein}&maxFat=${maxFat}&minFat=${minFat}&maxCarbs=${maxCarbs}&minCarbs=${minCarbs}&includeIngredients=${includeIngredients}&excludeIngredients=${exclude}&apiKey=${process.env.SPOONACULAR_API_KEY}`
-    );
+    // let reqUrl = `&maxCalories=${maxCalories}&minCalories=${minCalories}&maxProtein=${maxProtein}&minProtein=${minProtein}&maxFat=${maxFat}&minFat=${minFat}&maxCarbs=${maxCarbs}&minCarbs=${minCarbs}&excludeIngredients=${exclude}&apiKey=${process.env.SPOONACULAR_API_KEY}`;
+    let reqUrl = `&maxCalories=${maxCalories}&minCalories=${minCalories}&minProtein=${minProtein}&maxFat=${maxFat}&minFat=${minFat}&maxCarbs=${maxCarbs}&minCarbs=${minCarbs}&excludeIngredients=&apiKey=${process.env.SPOONACULAR_API_KEY}`;
+    if (includeIngredients.length > 0) {
+      reqUrl = `&includeIngredients=${includeIngredients}` + reqUrl;
+    } else {
+      reqUrl = `&includeIngredients=` + reqUrl;
+    }
+    if (query.length > 0) {
+      reqUrl = `query=${query}` + reqUrl;
+    } else {
+      reqUrl = `query=` + reqUrl;
+    }
 
+    console.log(
+      `Req URL:https://api.spoonacular.com/recipes/complexSearch?${reqUrl}`
+    );
+    const res = await fetch(
+      `https://api.spoonacular.com/recipes/complexSearch?${reqUrl}`
+    );
     if (!res.ok) {
       return null;
     }

@@ -9,6 +9,9 @@ const nextConfig = {
     });
     return config;
   },
+  images: {
+    domains: ["img.spoonacular.com"],
+  },
 };
 
 export default nextConfig;

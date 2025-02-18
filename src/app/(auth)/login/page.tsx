@@ -22,30 +22,40 @@ const Login = () => {
 
   const router = useRouter();
 
-    const handleThirdParty = async (provider: "google" | "github") => {
-      console.log(`Signing in with ${provider}`);
-      await signIn(provider);
-    };
+  const handleThirdParty = async (provider: "google" | "github") => {
+    console.log(`Signing in with ${provider}`);
+    await signIn(provider);
+  };
 
   const onSubmit = async (values: LoginFormValues) => {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      alert(`Error in Registration: ${errorData.error}: ${errorData.details}`);
-      throw new Error(errorData.error || "Failed to Login");
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log(errorData);
+        alert(
+          `Error in Login: ${errorData.error}. Please register or try again later.`
+        );
+        return;
+      }
 
-    const body = await response.json();
+      const body = await response.json();
 
-    if (body.userSurveyed === false) {
-      router.push("/register/survey");
-    } else {
-      router.push("/profile");
+      if (body.userSurveyed === false) {
+        router.push("/register/survey");
+      } else {
+        router.push("/profile");
+      }
+    } catch (err) {
+      console.error("Unexpected error during login:", err);
+      alert(
+        "An unexpected error occurred. Please register or try again later."
+      );
     }
   };
 

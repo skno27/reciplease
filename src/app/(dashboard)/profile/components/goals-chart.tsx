@@ -27,18 +27,23 @@ export function GoalsChart({ data }: GoalsProps) {
   const [activeChart, setActiveChart] =
     useState<keyof typeof chartConfig>("weight");
 
-  const totalCalories = useMemo(() => {
-    if (
-      !data.goalTracking.food.amount ||
-      data.goalTracking.food.amount.length === 0
-    )
-      return 0;
-    return data.goalTracking.food.amount.reduce(
-      (acc, entry) => acc + entry.amount,
-      0
-    );
-  }, [data.goalTracking.food.amount]);
+  let totalCalories = useMemo(() => {
+    if (data.goalTracking) {
+      if (
+        !data.goalTracking.food.amount ||
+        data.goalTracking.food.amount.length === 0
+      )
+        return 0;
+      return data.goalTracking.food.amount.reduce(
+        (acc, entry) => acc + entry.amount,
+        0
+      );
+    }
+  }, [data.goalTracking]);
 
+  if (!totalCalories) {
+    totalCalories = 0;
+  }
   const poundsLost = totalCalories / 3500;
 
   console.log("Total Calories from Food Tracking:", totalCalories);

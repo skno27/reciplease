@@ -36,6 +36,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
               <Image
                 src={recipe.image}
                 alt={recipe.title}
+                width={parseInt(
+                  recipe.image.split("-")[1].split(".")[0].split("x")[0]
+                )}
+                height={parseInt(
+                  recipe.image.split("-")[1].split(".")[0].split("x")[1]
+                )}
                 className="w-full h-40 object-cover rounded-2xl mt-2 shadow-md mx-auto"></Image>
               {/* <img
                 src={recipe.image}
@@ -68,7 +74,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
                   <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-transparent from-40% to-yellow-400 opacity-40 pointer-events-none"></div>
                   <p className="text-sm font-medium text-gray-600">Fat</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {recipe.nutrition.nutrients[1].amount}{" "}
+                    {recipe.nutrition.nutrients[2].amount}{" "}
                     <span className="text-xs text-gray-600">g</span>
                   </p>
                 </div>
@@ -76,7 +82,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
                   <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-transparent from-40% to-lime-400 opacity-40 pointer-events-none"></div>
                   <p className="text-sm font-medium text-gray-600">Protein</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {recipe.nutrition.nutrients[10].amount}{" "}
+                    {recipe.nutrition.nutrients[1].amount}{" "}
                     <span className="text-xs text-gray-600">g</span>
                   </p>
                 </div>
