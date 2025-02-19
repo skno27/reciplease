@@ -153,7 +153,7 @@ export const checkOtp = async (
 
   const updated = await prisma.credential.update({
     where: {
-      userId: otpObject.userId,
+      userId_type: { userId: otpObject.userId, type: "PASSWORDHASH" },
     },
     data: {
       value: hashedPassword,
