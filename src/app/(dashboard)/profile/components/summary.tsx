@@ -24,7 +24,7 @@ const Summary: React.FC<SummaryProps> = ({ data }) => {
             title="Calories"
             description="From Today's Meals"
             unit="kcal consumed"
-            info={data.healthLogs[data.healthLogs.length - 1]?.caloriesIn}
+            info={data.healthLogs[data.healthLogs.length - 1].caloriesIn!}
           />
         </TabsContent>
         <TabsContent value="exercise">
@@ -32,7 +32,7 @@ const Summary: React.FC<SummaryProps> = ({ data }) => {
             title="Exercise"
             description="From Today's Exercise"
             unit="kcal burned"
-            info={data.healthLogs[data.healthLogs.length - 1]?.caloriesOut}
+            info={data.healthLogs[data.healthLogs.length - 1].caloriesOut!}
           />
         </TabsContent>
         <TabsContent value="sleep">
@@ -40,7 +40,7 @@ const Summary: React.FC<SummaryProps> = ({ data }) => {
             title="Sleep"
             description="From Today's Sleep"
             unit="hours slept"
-            info={data.healthLogs[data.healthLogs.length - 1]?.sleep}
+            info={data.healthLogs[data.healthLogs.length - 1].sleep!}
           />
         </TabsContent>
       </Tabs>
