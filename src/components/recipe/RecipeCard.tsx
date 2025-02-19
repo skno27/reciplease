@@ -36,13 +36,18 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
               <Image
                 src={recipe.image}
                 alt={recipe.title}
-                width={parseInt(
-                  recipe.image.split("-")[1].split(".")[0].split("x")[0]
+                width={Math.ceil(
+                  parseInt(
+                    recipe.image.split("-")[1].split(".")[0].split("x")[0]
+                  ) / 2
                 )}
-                height={parseInt(
-                  recipe.image.split("-")[1].split(".")[0].split("x")[1]
+                height={Math.ceil(
+                  parseInt(
+                    recipe.image.split("-")[1].split(".")[0].split("x")[1]
+                  ) / 2
                 )}
-                className="w-full h-40 object-cover rounded-2xl mt-2 shadow-md mx-auto"></Image>
+                // className="w-full h-40 object-cover rounded-2xl mt-2 shadow-md mx-auto"></Image>
+                className="w-full object-cover rounded-2xl mt-4 shadow-md mx-auto border"></Image>
               {/* <img
                 src={recipe.image}
                 alt={recipe.title}
@@ -55,7 +60,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
 
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <div className="relative flex flex-col items-center bg-white/50 backdrop-blur-md p-4 rounded-md shadow-md overflow-hidden">
-                  <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-transparent from-40% to-red-400 opacity-40 pointer-events-none"></div>
+                  <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-transparent from-40% to-red-400 opacity-25 pointer-events-none"></div>
                   <p className="text-sm font-medium text-gray-600">Calories</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {recipe.nutrition.nutrients[0].amount}{" "}
@@ -63,7 +68,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
                   </p>
                 </div>
                 <div className="relative flex flex-col items-center bg-white/50 backdrop-blur-md p-4 rounded-md shadow-md overflow-hidden">
-                  <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-transparent from-40% to-teal-400 opacity-40 pointer-events-none"></div>
+                  <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-transparent from-40% to-teal-400 opacity-25 pointer-events-none"></div>
                   <p className="text-sm font-medium text-gray-600">Carbs</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {recipe.nutrition.nutrients[3].amount}{" "}
@@ -71,7 +76,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
                   </p>
                 </div>
                 <div className="relative flex flex-col items-center bg-white/50 backdrop-blur-md p-4 rounded-md shadow-md overflow-hidden">
-                  <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-transparent from-40% to-yellow-400 opacity-40 pointer-events-none"></div>
+                  <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-transparent from-40% to-yellow-400 opacity-25 pointer-events-none"></div>
                   <p className="text-sm font-medium text-gray-600">Fat</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {recipe.nutrition.nutrients[2].amount}{" "}
@@ -79,7 +84,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
                   </p>
                 </div>
                 <div className="relative flex flex-col items-center bg-white/50 backdrop-blur-md p-4 rounded-md shadow-md overflow-hidden">
-                  <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-transparent from-40% to-lime-400 opacity-40 pointer-events-none"></div>
+                  <div className="absolute bottom-0 right-0 w-full h-full bg-gradient-to-tl from-transparent from-40% to-lime-400 opacity-25 pointer-events-none"></div>
                   <p className="text-sm font-medium text-gray-600">Protein</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {recipe.nutrition.nutrients[1].amount}{" "}

@@ -24,7 +24,7 @@ const Login = () => {
 
   const handleThirdParty = async (provider: "google" | "github") => {
     console.log(`Signing in with ${provider}`);
-    await signIn(provider);
+    await signIn(provider, { callbackUrl: "/profile" });
   };
 
   const onSubmit = async (values: LoginFormValues) => {

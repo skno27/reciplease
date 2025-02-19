@@ -1,4 +1,4 @@
-import { getRecipes } from "@/app/api/_services/recipeService";
+import { getRecipes } from "@/app/api/services/recipeService";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../services/prisma";
 import { getIdFromRequest } from "../services/userService";

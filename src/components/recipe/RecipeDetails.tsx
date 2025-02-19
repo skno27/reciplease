@@ -38,7 +38,7 @@ const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe, onClose }) => {
     });
   };
 
-  const addToDailyTracker = (calories: number, protein: number) => {
+  const addToDailyTracker = async (calories: number, protein: number) => {
     // Get the current stored values
     const storedCalories = Number(localStorage.getItem("dailyCalories")) ?? 0;
     const storedProtein = Number(localStorage.getItem("dailyProtein")) ?? 0;
@@ -51,6 +51,7 @@ const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe, onClose }) => {
     localStorage.setItem("dailyCalories", newCalories.toString());
     localStorage.setItem("dailyProtein", newProtein.toString());
 
+    await fetch("/api/");
     toast({
       title: "Nutrition Added!",
       description: `+${calories} kcal | +${protein}g protein`,
