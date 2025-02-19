@@ -167,6 +167,7 @@ export const checkOtp = async (
 
 export const handleHealthData = async (id: string, data: HealthProfileData) => {
   console.log("handling data:", data);
+
   // breaks here for some reason...
   const updated = await prisma.user.update({
     where: { id },
@@ -187,6 +188,7 @@ export const handleHealthData = async (id: string, data: HealthProfileData) => {
 };
 
 export const getUserById = async (id: string) => {
+  console.log("getUserById fired: ", id);
   const user = await prisma.user.findUnique({
     where: { id },
   });
@@ -195,6 +197,7 @@ export const getUserById = async (id: string) => {
 };
 
 export const getIdFromRequest = async (req: NextRequest) => {
+  console.log("getIdFromRequest fired: ", req);
   const headerUserId = req.headers.get("X-User-Id"); // check for oauth
   let userId: string | null = null;
   if (headerUserId) {

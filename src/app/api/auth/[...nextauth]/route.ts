@@ -47,10 +47,12 @@ export const authOptions: NextAuthOptions = {
     },
 
     async signIn({ profile }) {
+      console.log("SIGN IN CALLBACK");
+      console.log("profile: ", profile);
       if (!profile?.email) {
         throw new Error("No profile");
       }
-      console.log("sign in callback triggered");
+
 
       await prisma.user.upsert({
         where: { email: profile.email },
@@ -66,16 +68,23 @@ export const authOptions: NextAuthOptions = {
     },
 
     async jwt({ token }) {
-      const dbUser = await prisma.user.findUnique({
-        where: { email: token.email! },
-        select: { id: true, surveyed: true },
-      });
-
-      token.surveyed = dbUser?.surveyed || false;
-
-      if (dbUser) {
-        token.id = dbUser.id; // Assign MongoDB _id to token.id
-        token.surveyed = dbUser.surveyed || false;
+      console.log("Token during JWT callback:", token);
+      if (!token.email) return token;
+      try {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email! },
+          select: { id: true, surveyed: true },
+        });
+  
+        token.surveyed = dbUser?.surveyed || false;
+  
+        if (dbUser) {
+          token.id = dbUser.id; // Assign MongoDB _id to token.id
+          token.surveyed = dbUser.surveyed || false;
+        }
+      }
+      catch (error) {
+        console.error("JWT Callback Error:", error);
       }
       return token;
     },
