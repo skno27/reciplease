@@ -17,7 +17,7 @@ export const updatePassword = async (userId: string, newPassword: string) => {
   }
   const updatedHash = await encryptPassword(newPassword);
   const updated = await prisma.credential.update({
-    where: { userId: userId, type: "PASSWORDHASH" },
+    where: { userId_type: { userId, type: "PASSWORDHASH" } },
     data: {
       value: updatedHash,
     },
