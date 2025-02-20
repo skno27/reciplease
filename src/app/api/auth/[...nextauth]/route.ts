@@ -30,8 +30,6 @@ export const authOptions: NextAuthOptions = {
   debug: true,
   callbacks: {
     async session({ session, user, token }) {
-      console.log("session before: ", session);
-      console.log("token data: ", token);
       if (token) {
         session.user = {
           ...session.user,
@@ -42,14 +40,11 @@ export const authOptions: NextAuthOptions = {
       if (token?.surveyed !== undefined) {
         session.user.surveyed = token.surveyed;
       }
-      console.log("session after: ", session);
+
       return session;
     },
 
     async signIn({ user, account, profile }: { user: any; account?: any; profile?: any }) {
-      console.log("SIGN IN CALLBACK");
-      console.log("profile: ", profile);
-      console.log("account: ", account);
     
       if (!profile?.email) {
         throw new Error("No email found in profile");
@@ -110,7 +105,7 @@ export const authOptions: NextAuthOptions = {
     },
 
     async jwt({ token }) {
-      console.log("Token during JWT callback:", token);
+
       if (!token.email) return token;
       try {
         const dbUser = await prisma.user.findUnique({
