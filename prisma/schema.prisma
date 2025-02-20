@@ -134,11 +134,11 @@ enum TrackingType {
 model DailyHealthLog {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   date        DateTime @default(now())
-  caloriesIn  Int      @default(0)
-  caloriesOut Int      @default(0)
-  protein     Int      @default(0)
-  water       Int      @default(0)
-  sleep       Int      @default(0)
+  caloriesIn  Float?   @default(0)
+  caloriesOut Float?   @default(0)
+  protein     Float?   @default(0)
+  water       Float?   @default(0)
+  sleep       Int?     @default(0)
   User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String   @map("user_id") @db.ObjectId
 }
@@ -235,12 +235,13 @@ enum CredentialType {
 model Credential {
   id       String         @id @default(auto()) @map("_id") @db.ObjectId
   type     CredentialType
-  value    String         @db.String
+  value    String         @db.String // hash or provider.id here
   provider Provider?
 
-  userId String @unique @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation(fields: userId, references: id, onDelete: Cascade)
 
-  user User @relation(fields: userId, references: id, onDelete: Cascade)
+  @@unique([userId, type])
 }
 
 enum Provider {

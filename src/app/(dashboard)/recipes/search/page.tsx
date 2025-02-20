@@ -65,7 +65,7 @@ const SearchForm = () => {
         </div>
 
         <div className="space-y-4 mt-32">
-          <h2 className="text-2xl mt-8">Add ingredients to exclude</h2>
+          <h2 className="text-2xl mt-8">Add ingredients to include</h2>
           <div className=" flex  gap-2 border-b border-black">
             <input
               placeholder="Add an ingredient"
