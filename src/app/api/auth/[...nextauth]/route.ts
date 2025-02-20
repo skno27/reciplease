@@ -4,13 +4,16 @@ import GithubProvider from "next-auth/providers/github";
 import prisma from "../../services/prisma";
 import { CredentialType, Provider } from "@prisma/client";
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma), // *
   jwt: {
     secret: process.env.NEXTAUTH_SECRET,
   },
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: "jwt",
+    strategy: "database", // Store sessions in the Prisma database
+    maxAge: 30 * 24 * 60 * 60, // Optional: Set session expiration (30 days)
+    updateAge: 24 * 60 * 60, // Update session data every 24 hours
   },
   providers: [
     GoogleProvider({
@@ -28,93 +31,95 @@ const authOptions: NextAuthOptions = {
   ],
   // debug: true,
   callbacks: {
-    async signIn({ profile, account }) {
+    async session({ session, user }) {
+      console.log("Session callback triggered");
+      console.log("Session before update:", session);
+    
+      if (user) {
+        session.user = {
+          ...session.user,
+          id: user.id, 
+          surveyed: user.surveyed || false, 
+        };
+      }
+    
+      console.log("Updated Session:", session);
+      return session;
+    },
+
+    async signIn({ user, account, profile }: { user: any; account?: any; profile?: any }) {
+    
       if (!profile?.email) {
-        throw new Error("No profile email available");
+        throw new Error("No email found in profile");
       }
-      console.log("sign in callback triggered");
-
-      // Extract provider data from account
-      const email = profile.email;
-      const provider = account?.provider;
-      const providerAccountId = account?.providerAccountId;
-      if (!provider || !providerAccountId) {
-        throw new Error("Missing provider information");
-      }
-
-      // Check if the user exists
-      let user = await prisma.user.findUnique({
-        where: { email },
+    
+      // Find existing user by email
+      const existingUser = await prisma.user.findUnique({
+        where: { email: profile.email },
+        include: { accounts: true }, 
       });
-
-      if (!user) {
-        // Create new user with OAuth credential
-        user = await prisma.user.create({
+    
+      if (existingUser) {
+        // If an account exists, ensure it's linked
+        if (account && existingUser.accounts) {
+          const hasLinkedAccount = existingUser.accounts.some(
+            (acc) => acc.provider === account.provider
+          );
+    
+          if (!hasLinkedAccount) {
+            // Link new provider to existing user
+            await prisma.account.create({
+              data: {
+                userId: existingUser.id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            });
+          }
+        }
+    
+        return true;
+      }
+    
+      // If no existing user and account is present, create new user
+      if (account) {
+        await prisma.user.create({
           data: {
-            email,
-            name: profile.name ?? "unknown",
-            credentials: {
+            email: profile.email,
+            name: profile.name ?? "Unknown",
+            accounts: {
               create: {
-                type: CredentialType.OAUTH,
-                value: providerAccountId,
-                provider: provider.toUpperCase() as Provider,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
               },
             },
           },
         });
-      } else {
-        // User exists: check for an existing OAuth credential for this provider
-        const existingCredential = await prisma.credential.findFirst({
-          where: {
-            userId: user.id,
-            type: CredentialType.OAUTH,
-            provider: provider.toUpperCase() as Provider,
-          },
-        });
-
-        if (existingCredential) {
-          // Compare stored value with incoming OAuth unique ID
-          if (existingCredential.value !== providerAccountId) {
-            console.error("Credential mismatch: possible exploit attempt");
-            return false;
-          }
-        } else {
-          // No credential for this provider exists; create one.
-          await prisma.credential.create({
-            data: {
-              type: CredentialType.OAUTH,
-              value: providerAccountId,
-              provider: provider.toUpperCase() as Provider,
-              user: { connect: { id: user.id } },
-            },
-          });
-        }
       }
+    
       return true;
     },
-    async jwt({ token, profile }) {
-      // If we get profile data from the provider, add its email to the token
-      if (profile?.email) {
-        token.email = profile.email;
+
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith(baseUrl)) return url;
+      return `${baseUrl}/profile`; 
+    },
+
+    async jwt({ token, user, account }) {
+      console.log("JWT callback triggered");
+      console.log("User:", user); // Should log the user object when a login happens
+      console.log("Token:", token); // Check the token structure
+      // Only add details if the user is logging in for the first time
+      if (user) {
+        token.id = user.id;
+        token.surveyed = user.surveyed || false;
       }
-      // Lookup the user by email and set token.id and token.surveyed
-      if (token.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email },
-          select: { id: true, surveyed: true },
-        });
-        token.id = dbUser?.id as string;
-        token.surveyed = dbUser?.surveyed || false;
-      }
+
+      console.log("Updated Token:", token); // Log token after modification
       return token;
-    },
-    async session({ session, token }) {
-      // Attach the token fields to the session
-      session.user.id = token.id as string;
-      session.user.email = token.email as string;
-      session.user.surveyed = token.surveyed as boolean;
-      return session;
-    },
+    }
   },
 };
 
