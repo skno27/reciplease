@@ -46,25 +46,67 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    async signIn({ profile }) {
+    async signIn({ user, account, profile }: { user: any; account?: any; profile?: any }) {
       console.log("SIGN IN CALLBACK");
       console.log("profile: ", profile);
+      console.log("account: ", account);
+    
       if (!profile?.email) {
-        throw new Error("No profile");
+        throw new Error("No email found in profile");
       }
-
-
-      await prisma.user.upsert({
+    
+      // Find existing user by email
+      const existingUser = await prisma.user.findUnique({
         where: { email: profile.email },
-        create: {
-          email: profile.email,
-          name: profile.name ?? "unknown",
-        },
-        update: {
-          name: profile.name,
-        },
+        include: { accounts: true }, 
       });
+    
+      if (existingUser) {
+        // If an account exists, ensure it's linked
+        if (account && existingUser.accounts) {
+          const hasLinkedAccount = existingUser.accounts.some(
+            (acc) => acc.provider === account.provider
+          );
+    
+          if (!hasLinkedAccount) {
+            // Link new provider to existing user
+            await prisma.account.create({
+              data: {
+                userId: existingUser.id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            });
+          }
+        }
+    
+        return true;
+      }
+    
+      // If no existing user and account is present, create new user
+      if (account) {
+        await prisma.user.create({
+          data: {
+            email: profile.email,
+            name: profile.name ?? "Unknown",
+            accounts: {
+              create: {
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            },
+          },
+        });
+      }
+    
       return true;
+    },
+
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith(baseUrl)) return url;
+      return `${baseUrl}/profile`; 
     },
 
     async jwt({ token }) {
