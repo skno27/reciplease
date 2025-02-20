@@ -11,7 +11,9 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: "jwt",
+    strategy: "database", // Store sessions in the Prisma database
+    maxAge: 30 * 24 * 60 * 60, // Optional: Set session expiration (30 days)
+    updateAge: 24 * 60 * 60, // Update session data every 24 hours
   },
   providers: [
     GoogleProvider({
@@ -30,6 +32,10 @@ export const authOptions: NextAuthOptions = {
   debug: true,
   callbacks: {
     async session({ session, user, token }) {
+      console.log("Session callback triggered");
+      console.log("Session:", session);
+      console.log("Token:", token); // Ensure that token is passed correctly
+
       if (token) {
         session.user = {
           ...session.user,
@@ -37,10 +43,7 @@ export const authOptions: NextAuthOptions = {
           surveyed: token.surveyed || false,
         }
       }
-      if (token?.surveyed !== undefined) {
-        session.user.surveyed = token.surveyed;
-      }
-
+      console.log("Updated Session:", session); // Log updated session
       return session;
     },
 
@@ -104,27 +107,19 @@ export const authOptions: NextAuthOptions = {
       return `${baseUrl}/profile`; 
     },
 
-    async jwt({ token }) {
+    async jwt({ token, user, account }) {
+      console.log("JWT callback triggered");
+      console.log("User:", user); // Should log the user object when a login happens
+      console.log("Token:", token); // Check the token structure
+      // Only add details if the user is logging in for the first time
+      if (user) {
+        token.id = user.id;
+        token.surveyed = user.surveyed || false;
+      }
 
-      if (!token.email) return token;
-      try {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email! },
-          select: { id: true, surveyed: true },
-        });
-  
-        token.surveyed = dbUser?.surveyed || false;
-  
-        if (dbUser) {
-          token.id = dbUser.id; // Assign MongoDB _id to token.id
-          token.surveyed = dbUser.surveyed || false;
-        }
-      }
-      catch (error) {
-        console.error("JWT Callback Error:", error);
-      }
+      console.log("Updated Token:", token); // Log token after modification
       return token;
-    },
+    }
   },
 };
 
