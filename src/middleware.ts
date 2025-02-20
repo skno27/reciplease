@@ -17,49 +17,41 @@ export default async function middleware(req: NextRequest) {
   let surveyed: boolean | undefined = undefined;
 
   // Check if the custom native auth cookie is present.
-  const nativeJwt = req.cookies.get("jwt")?.value;
-  if (nativeJwt) {
-    // Use your native auth function to verify the JWT.
-    const nativeResult = await isNativeAuthenticated(req);
-    if (nativeResult instanceof NextResponse) {
-      // If native authentication fails, isNativeAuthenticated returns a redirect.
-      return nativeResult;
-    }
-    // Successful native authentication.
-    // Note: For native auth, we're only verifying the JWT. No NextAuth session is being supplied.
-    userId = (nativeResult as { user: { id: string } }).user.id;
-    authType = "native";
-  } else {
-    // No native JWT, so try to retrieve a NextAuth (OAuth) session.
-    const nextAuthToken = await getToken({
-      req,
-      secret: process.env.NEXTAUTH_SECRET,
-    });
-    if (!nextAuthToken) {
-      // No valid OAuth session—redirect to login.
-      return NextResponse.redirect(new URL("/login", req.url), { status: 303 });
-    }
-    // For OAuth, extract the user ID and the 'surveyed' flag.
-    userId = nextAuthToken?.id as string;
-    surveyed = nextAuthToken?.surveyed as boolean | undefined;
-    authType = "oauth";
+  const sessionToken = req.cookies.get("next-auth.session-token")?.value;
+
+  if (!sessionToken) {
+    return NextResponse.redirect(new URL("/login", req.url), { status: 303 });
   }
 
-  // For OAuth users only: if the survey hasn't been completed, redirect to the survey page.
-  if (authType === "oauth" && surveyed === false) {
-    return NextResponse.redirect(new URL("/register/survey", req.url));
+    if (!sessionToken) {
+    return NextResponse.redirect(new URL("/login", req.url), { status: 303 });
+  }  
+  // Fetch the session from an API route (since middleware cannot access Prisma)
+  const sessionRes = await fetch(`${req.nextUrl.origin}/api/auth/session`, {
+    headers: { Cookie: `next-auth.session-token=${sessionToken}` },
+    credentials: "include",
+  });
+
+  if (!sessionRes.ok) {
+    return NextResponse.redirect(new URL("/login", req.url), { status: 303 });
   }
 
-  // If we reach here, authentication has passed.
-  // For native auth, no session is created—you're simply verifying the token.
-  // Proceed with the request.
+  const session = await sessionRes.json();
+
+  if (!session?.user?.id) {
+    return NextResponse.redirect(new URL("/login", req.url), { status: 303 });
+  }
+
+    // Redirect users who haven't completed the survey
+    if (session.user.surveyed === false) {
+      return NextResponse.redirect(new URL("/register/survey", req.url));
+    }
+
+      // Authentication is valid; proceed with request
   const response = NextResponse.next();
-  if (userId) {
-    response.headers.set("X-User-Id", userId);
-  }
-  console.log("Set ID:", userId);
-
+  response.headers.set("X-User-Id", session.user.id);
   return response;
+  
 }
 
 export const config = {

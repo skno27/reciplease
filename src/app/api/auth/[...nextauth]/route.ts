@@ -31,19 +31,19 @@ export const authOptions: NextAuthOptions = {
   ],
   debug: true,
   callbacks: {
-    async session({ session, user, token }) {
+    async session({ session, user }) {
       console.log("Session callback triggered");
-      console.log("Session:", session);
-      console.log("Token:", token); // Ensure that token is passed correctly
-
-      if (token) {
+      console.log("Session before update:", session);
+    
+      if (user) {
         session.user = {
           ...session.user,
-          id: token.id,
-          surveyed: token.surveyed || false,
-        }
+          id: user.id, 
+          surveyed: user.surveyed || false, 
+        };
       }
-      console.log("Updated Session:", session); // Log updated session
+    
+      console.log("Updated Session:", session);
       return session;
     },
 
