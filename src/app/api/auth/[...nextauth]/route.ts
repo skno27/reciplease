@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import prisma from "../../services/prisma";
+import { PrismaAdapter } from "@auth/prisma-adapter"
 import { CredentialType, Provider } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
