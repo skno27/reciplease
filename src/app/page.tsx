@@ -4,8 +4,9 @@ import { authOptions } from "./api/auth/[...nextauth]/route";
 import Link from "next/link";
 
 export default async function Home() {
+  //if logged in, go directly to profile page
   const session = await getServerSession(authOptions);
-  console.log("session: ", session);
+  console.log("session on home page: ", session);
   if (session) {
     redirect("/profile"); 
   }

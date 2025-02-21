@@ -6,15 +6,15 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { CredentialType, Provider } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma), // *
+  adapter: PrismaAdapter(prisma),
   jwt: {
     secret: process.env.NEXTAUTH_SECRET,
   },
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: "database", // Store sessions in the Prisma database
-    maxAge: 30 * 24 * 60 * 60, // Optional: Set session expiration (30 days)
-    updateAge: 24 * 60 * 60, // Update session data every 24 hours
+    strategy: "database", 
+    maxAge: 30 * 24 * 60 * 60, //30 days
+    updateAge: 24 * 60 * 60, // 24 hours
   },
   providers: [
     GoogleProvider({
@@ -110,15 +110,15 @@ export const authOptions: NextAuthOptions = {
 
     async jwt({ token, user, account }) {
       console.log("JWT callback triggered");
-      console.log("User:", user); // Should log the user object when a login happens
-      console.log("Token:", token); // Check the token structure
+      console.log("User:", user);
+      console.log("Token:", token); 
       // Only add details if the user is logging in for the first time
       if (user) {
         token.id = user.id;
         token.surveyed = user.surveyed || false;
       }
 
-      console.log("Updated Token:", token); // Log token after modification
+      console.log("Updated Token:", token);
       return token;
     }
   },
